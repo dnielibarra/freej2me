@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Juegos .jar con FreeJ2ME</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1em;
+    }
+    select, button {
+      font-size: 1.2em;
+      margin: 0.5em;
+      padding: 0.5em;
+    }
+    canvas {
+      border: 1px solid #fff;
+      background: black;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Juegos Java (.jar) en línea</h1>
+
+  <label for="gameSelector">Selecciona un juego:</label>
+  <select id="gameSelector">
+    <option value="">-- Elige un juego --</option>
+    <option value="games/SuperMarioPlanet.jar">Super Mario Planet</option>
+    <!-- Puedes agregar más opciones aquí -->
+  </select>
+
+  <button id="playBtn" disabled>Jugar</button>
+
+  <canvas id="canvas" width="240" height="320"></canvas>
+
+  <script type="module">
+    import init from "./src/init.js";
+
+    const canvas = document.getElementById("canvas");
+    const selector = document.getElementById("gameSelector");
+    const playBtn = document.getElementById("playBtn");
+
+    let j2me;
+
+    init(canvas).then((emulador) => {
+      j2me = emulador;
+    });
+
+    selector.addEventListener("change", () => {
+      playBtn.disabled = !selector.value;
+    });
+
+    playBtn.addEventListener("click", async () => {
+      const url = selector.value;
+      if (!url || !j2me) return;
+
+      try {
+        const res = await fetch(url);
+        const buffer = await res.arrayBuffer();
+        const jar = new Uint8Array(buffer);
+        j2me.loadJar(jar, url);
+      } catch (error) {
+        alert("Error al cargar el juego: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
